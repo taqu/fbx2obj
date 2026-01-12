@@ -82,6 +82,8 @@ void Shape::parse(const fbxsdk::FbxShape* fbxShape, const fbxsdk::FbxMesh* fbxMe
     vertices_.clear();
     meshToShape_.clear();
 
+    int32_t meshControlPointCount = fbxMesh->GetControlPointsCount();
+    int32_t shapeControlPointCount = fbxShape->GetControlPointsCount();
     std::unordered_set<int32_t> controlPointSet;
     for(int32_t i=0; i<fbxShape->GetControlPointIndicesCount(); ++i){
         controlPointSet.insert(fbxShape->GetControlPointIndices()[i]);

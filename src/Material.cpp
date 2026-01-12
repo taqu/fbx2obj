@@ -70,6 +70,16 @@ const std::string& Material::getTextureDiffuse() const
     return textureDiffuse_;
 }
 
+const std::string& Material::getTextureEmission() const
+{
+    return textureEmission_;
+}
+
+const std::string& Material::getTextureSpecular() const
+{
+    return textureSpecular_;
+}
+
 const std::string& Material::getTextureNormal() const
 {
     return textureNormal_;
@@ -79,13 +89,7 @@ void Material::parse(const fbxsdk::FbxSurfaceMaterial* fbxMaterial)
 {
     assert(nullptr != fbxMaterial);
     name_ = fbxMaterial->GetName();
-    if(fbxMaterial->GetClassId().Is(fbxsdk::FbxSurfaceLambert::ClassId)) {
-        const fbxsdk::FbxSurfaceLambert* lambert = static_cast<const fbxsdk::FbxSurfaceLambert*>(fbxMaterial);
-        ambient_ = get(lambert->Ambient, lambert->AmbientFactor.Get());
-        diffuse_ = get(lambert->Diffuse, lambert->DiffuseFactor.Get());
-        emission_ = get(lambert->Emissive, lambert->EmissiveFactor.Get());
-        transparent_ = get(lambert->TransparentColor, lambert->TransparencyFactor.Get());
-    } else if(fbxMaterial->GetClassId().Is(fbxsdk::FbxSurfacePhong::ClassId)) {
+    if(fbxMaterial->GetClassId().Is(fbxsdk::FbxSurfacePhong::ClassId)) {
         const fbxsdk::FbxSurfacePhong* phong = static_cast<const fbxsdk::FbxSurfacePhong*>(fbxMaterial);
         ambient_ = get(phong->Ambient, phong->AmbientFactor.Get());
         diffuse_ = get(phong->Diffuse, phong->DiffuseFactor.Get());
@@ -94,27 +98,29 @@ void Material::parse(const fbxsdk::FbxSurfaceMaterial* fbxMaterial)
         reflection_ = get(phong->Reflection, phong->ReflectionFactor.Get());
         specular_ = get(phong->Specular, phong->SpecularFactor.Get());
         shininess_ = static_cast<float>(phong->Shininess.Get());
+    }else if(fbxMaterial->GetClassId().Is(fbxsdk::FbxSurfaceLambert::ClassId)) {
+        const fbxsdk::FbxSurfaceLambert* lambert = static_cast<const fbxsdk::FbxSurfaceLambert*>(fbxMaterial);
+        ambient_ = get(lambert->Ambient, lambert->AmbientFactor.Get());
+        diffuse_ = get(lambert->Diffuse, lambert->DiffuseFactor.Get());
+        emission_ = get(lambert->Emissive, lambert->EmissiveFactor.Get());
+        transparent_ = get(lambert->TransparentColor, lambert->TransparencyFactor.Get());
     }
 
-    {
-        fbxsdk::FbxProperty property = fbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
-        int32_t numLayers = property.GetSrcObjectCount<fbxsdk::FbxLayeredTexture>();
-        if(numLayers <= 0) {
-            int32_t numTextures = property.GetSrcObjectCount<fbxsdk::FbxFileTexture>();
-            if(0 < numTextures) {
-                const fbxsdk::FbxFileTexture* texture = property.GetSrcObject<fbxsdk::FbxFileTexture>(0);
-                textureDiffuse_ = texture->GetRelativeFileName();
-            }
-        }
+    parseTexture(textureDiffuse_, fbxMaterial, fbxsdk::FbxSurfaceMaterial::sDiffuse);
+    parseTexture(textureEmission_, fbxMaterial, fbxsdk::FbxSurfaceMaterial::sEmissive);
+    parseTexture(textureSpecular_, fbxMaterial, fbxsdk::FbxSurfaceMaterial::sSpecular);
+    parseTexture(textureNormal_, fbxMaterial, fbxsdk::FbxSurfaceMaterial::sNormalMap);
+}
 
-        property = fbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sNormalMap);
-        numLayers = property.GetSrcObjectCount<fbxsdk::FbxLayeredTexture>();
-        if(numLayers <= 0) {
-            int32_t numTextures = property.GetSrcObjectCount<fbxsdk::FbxFileTexture>();
-            if(0 < numTextures) {
-                const fbxsdk::FbxFileTexture* texture = property.GetSrcObject<fbxsdk::FbxFileTexture>(0);
-                textureNormal_ = texture->GetRelativeFileName();
-            }
+void Material::parseTexture(std::string& dst, const fbxsdk::FbxSurfaceMaterial* fbxMaterial, const char* type)
+{
+    fbxsdk::FbxProperty property = fbxMaterial->FindProperty(type);
+    int32_t numLayers = property.GetSrcObjectCount<fbxsdk::FbxLayeredTexture>();
+    if(numLayers <= 0) {
+        int32_t numTextures = property.GetSrcObjectCount<fbxsdk::FbxFileTexture>();
+        if(0 < numTextures) {
+            const fbxsdk::FbxFileTexture* texture = property.GetSrcObject<fbxsdk::FbxFileTexture>(0);
+            dst = texture->GetRelativeFileName();
         }
     }
 }

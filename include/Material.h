@@ -29,9 +29,12 @@ public:
     const Vector4& getSpecular() const;
     float getShininess() const;
     const std::string& getTextureDiffuse() const;
+    const std::string& getTextureEmission() const;
+    const std::string& getTextureSpecular() const;
     const std::string& getTextureNormal() const;
 
     void parse(const fbxsdk::FbxSurfaceMaterial* fbxMaterial);
+    void parseTexture(std::string& dst, const fbxsdk::FbxSurfaceMaterial* fbxMaterial, const char* type);
 
     std::string name_;
     Vector4 ambient_ = {};
@@ -42,6 +45,8 @@ public:
     Vector4 specular_ = {};
     float shininess_ = 0.0f;
     std::string textureDiffuse_;
+    std::string textureEmission_;
+    std::string textureSpecular_;
     std::string textureNormal_;
 };
 } // namespace fbx2obj

@@ -170,7 +170,7 @@ void Mesh::parse(const fbxsdk::FbxMesh* fbxMesh)
     if(node->GetMaterialCount() <= 0) {
         return;
     }
-    assert(node->GetMaterialCount() == 1);
+    assert(node->GetMaterialCount() >= 1);
     const fbxsdk::FbxSurfaceMaterial* material = node->GetMaterial(0);
     if(nullptr == material) {
         return;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.50)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release")
 
-set(PROJECT_NAME Fbx2Obj CXX)
+set(PROJECT_NAME fbx2obj CXX)
 project(${PROJECT_NAME})
 
 set(HEADER_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/include")
